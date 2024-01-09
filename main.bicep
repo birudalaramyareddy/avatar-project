@@ -35,6 +35,7 @@ param searchServiceLocation string = ''
 
 param openAiResourceGroupName string = ''
 param openAiServiceName string = ''
+param communicationServiceName string = ''
 param openAiResourceGroupLocation string
 param openAiSkuName string = 'S0'
 param chatGptDeploymentName string // Set in main.parameters.json
@@ -49,6 +50,9 @@ param gpt4vDeploymentName string = 'gpt-4v'
 param gpt4vModelName string = 'gpt-4'
 param gpt4vModelVersion string = 'vision-preview'
 param chatGpt4vDeploymentCapacity int = 10
+param communicationResourceGroupName string = ''
+param linkedDomains array = [] // Update with the desired linked domains
+
 
 
 @allowed([ 'azure', 'openai' ])
@@ -153,6 +157,9 @@ resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' exi
   name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : resourceGroup.name
 }
 
+resource communicationResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(communicationResourceGroupName)) {
+  name: !empty(communicationResourceGroupName) ? communicationResourceGroupName : resourceGroup.name
+}
 
 module storage 'storage/storage-account.bicep' = {
   name: 'storage'
@@ -250,6 +257,16 @@ module openAi 'ai/cognitiveservices.bicep' = {
   }
 }
 
+module communicationServiceModule 'communication/communication.bicep' = {
+  name: 'communicationServiceModule'
+  scope: communicationResourceGroup
+  params: {
+    name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
+    location: location
+    dataLocation: location
+    linkedDomains: linkedDomains
+  }
+}
 
 // Debugging output
 output debugInfo object = {
