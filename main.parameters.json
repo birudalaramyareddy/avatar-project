@@ -1,0 +1,137 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "searchServiceResourceGroupName": {
+        "value": ""
+      },
+      "speechServiceResourceGroupName": {
+        "value": ""
+      },
+      "searchServiceName": {
+        "value": ""
+      },
+      "speechServiceName": {
+        "value": ""
+      },
+      "searchServiceLocation": {
+        "value": "eastus"
+      },
+      "searchServiceSkuName": {
+        "value": "basic"
+      },
+      "sqlResourceGroupName": {
+        "value": ""
+      },
+      "sqlname": {
+        "value": ""
+      },
+      "dbServerName": {
+        "value": ""
+      },
+      "appServicePlanName": {
+        "value": ""
+      },
+      "storageSkuName": {
+        "value": "Standard_LRS"
+      },
+      "storageAccountName": {
+        "value": ""
+      },
+      "storageResourceGroupName": {
+        "value": ""
+      },
+      "storageContainerName": {
+        "value": "content"
+      },
+      "environmentName": {
+        "value": "mwc-dev"
+         
+      },
+      "resourceGroupName": {
+        "value": ""
+      },
+      "location": {
+        "value": "eastus"
+      },
+      "ADGroupAdmin": {
+        "value": "sql"
+      },
+      "sid": {
+        "value": "24e9f8e0-a7cb-4cde-a6a4-d73f4fa36f44"
+      },
+      "tenantId": {
+        "value": "85f761cd-2ee3-450d-8615-76b74edceeff"
+      
+      },
+      "openAiResourceGroupName": {
+        "value": ""
+      },
+      "openAiServiceName": {
+        "value": ""
+      },
+      "openAiResourceGroupLocation": {
+        "value": "eastus"
+      },
+      "openAiSkuName": {
+        "value": "S0"
+      },
+      "chatGptDeploymentName": {
+        "value": "chatGptDeployment1"
+      },
+      "chatGptModelVersion": {
+        "value": "0613"
+      },
+      "chatGptDeploymentCapacity": {
+        "value": 30
+      },
+      "embeddingDeploymentName": {
+        "value": "embeddingDeployment1"
+      },
+      "embeddingModelName": {
+        "value": "text-embedding-ada-002"
+      },
+      "embeddingDeploymentCapacity": {
+        "value": 30
+      },
+      "useGPT4V": {
+        "value": false
+      },
+      "gpt4vDeploymentName": {
+        "value": "gpt-4v"
+      },
+      "gpt4vModelName": {
+        "value": "gpt-4"
+      },
+      "gpt4vModelVersion": {
+        "value": "vision-preview"
+      },
+      "chatGpt4vDeploymentCapacity": {
+        "value": 10
+      },
+      "formRecognizerResourceGroupName": {
+        "value": ""
+      },
+      "formRecognizerServiceName": {
+        "value": "myFormRecognizerService1"
+      },
+      "formRecognizerSkuName": {
+        "value": "S0"
+      },
+      "computerVisionResourceGroupName": {
+        "value": ""
+      },
+      "computerVisionResourceGroupLocation": {
+        "value": "eastus"
+      },
+      "computerVisionSkuName": {
+        "value": "S1"
+      },
+      "computerVisionServiceName": {
+        "value": "myComputerVisionService1"
+      },
+      "openAiHost": {
+        "value": "openai"
+      }
+    }
+}

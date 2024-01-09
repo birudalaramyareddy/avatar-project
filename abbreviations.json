@@ -1,0 +1,11 @@
+{
+    "resourcesResourceGroups": "rg-",
+    "storageStorageAccounts": "st",
+    "webServerFarms": "plan-",
+    "keyVaultVaults": "kv-",
+    "sqlname": "sql-",
+    "dbServerName": "sqldb-",
+    "cognitiveServicesAccounts": "cog-",
+    "cognitiveServicesFormRecognizer": "cog-fr-",
+    "cognitiveServicesComputerVision": "cog-cv-"
+}
