@@ -109,27 +109,7 @@
       "chatGpt4vDeploymentCapacity": {
         "value": 10
       },
-      "formRecognizerResourceGroupName": {
-        "value": ""
-      },
-      "formRecognizerServiceName": {
-        "value": "myFormRecognizerService1"
-      },
-      "formRecognizerSkuName": {
-        "value": "S0"
-      },
-      "computerVisionResourceGroupName": {
-        "value": ""
-      },
-      "computerVisionResourceGroupLocation": {
-        "value": "eastus"
-      },
-      "computerVisionSkuName": {
-        "value": "S1"
-      },
-      "computerVisionServiceName": {
-        "value": "myComputerVisionService1"
-      },
+     
       "openAiHost": {
         "value": "openai"
       }

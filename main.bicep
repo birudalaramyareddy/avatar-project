@@ -38,25 +38,18 @@ param openAiServiceName string = ''
 param openAiResourceGroupLocation string
 param openAiSkuName string = 'S0'
 param chatGptDeploymentName string // Set in main.parameters.json
-param chatGptModelName string = (openAiHost == 'azure') ? 'gpt-35-turbo' : 'gpt-3.5-turbo'
+param chatGptModelName string = (openAiHost == 'azure') ? 'gpt-3.5-turbo' : 'gpt-35-turbo'
 param chatGptModelVersion string = '0613'
 param chatGptDeploymentCapacity int = 30
 param embeddingDeploymentName string // Set in main.parameters.json
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingDeploymentCapacity int = 30
-param useGPT4V bool = false
+param useGPT4V bool = true
 param gpt4vDeploymentName string = 'gpt-4v'
 param gpt4vModelName string = 'gpt-4'
 param gpt4vModelVersion string = 'vision-preview'
 param chatGpt4vDeploymentCapacity int = 10
-param formRecognizerResourceGroupName string = ''
-param formRecognizerServiceName string = ''
-param formRecognizerResourceGroupLocation string = location
-param formRecognizerSkuName string = 'S0'
-param computerVisionResourceGroupName string = ''
-param computerVisionResourceGroupLocation string = 'eastus' // Vision vectorize API is yet to be deployed globally
-param computerVisionSkuName string = 'S1'
-param computerVisionServiceName string = ''
+
 
 @allowed([ 'azure', 'openai' ])
 param openAiHost string // Set in main.parameters.json
@@ -67,10 +60,6 @@ param searchServiceSkuName string // Set in main.parameters.json
 
 var abbrs = loadJsonContent('abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
-
-var computerVisionName = !empty(computerVisionServiceName) ? computerVisionServiceName : '${abbrs.cognitiveServicesComputerVision}${resourceToken}'
-
-
 
 param sku object = {
   name: 'S0'
@@ -164,12 +153,6 @@ resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' exi
   name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : resourceGroup.name
 }
 
-resource formRecognizerResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(formRecognizerResourceGroupName)) {
-  name: !empty(formRecognizerResourceGroupName) ? formRecognizerResourceGroupName : resourceGroup.name
-}
-resource computerVisionResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(computerVisionResourceGroupName)) {
-  name: !empty(computerVisionResourceGroupName) ? computerVisionResourceGroupName : resourceGroup.name
-}
 
 module storage 'storage/storage-account.bicep' = {
   name: 'storage'
@@ -267,31 +250,6 @@ module openAi 'ai/cognitiveservices.bicep' = {
   }
 }
 
-module formRecognizer 'ai/cognitiveservices.bicep' = {
-  name: 'formrecognizer'
-  scope: formRecognizerResourceGroup
-  params: {
-    name: !empty(formRecognizerServiceName) ? formRecognizerServiceName : '${abbrs.cognitiveServicesFormRecognizer}${resourceToken}'
-    kind: 'FormRecognizer'
-    location: formRecognizerResourceGroupLocation
-    sku: {
-      name: formRecognizerSkuName
-    }
-  }
-}
-
-module computerVision 'ai/cognitiveservices.bicep' = if (useGPT4V) {
-  name: 'computerVision'
-  scope: computerVisionResourceGroup
-  params: {
-    name: computerVisionName
-    kind: 'ComputerVision'
-    location: computerVisionResourceGroupLocation
-    sku: {
-      name: computerVisionSkuName
-    }
-  }
-}
 
 // Debugging output
 output debugInfo object = {
