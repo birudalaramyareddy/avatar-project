@@ -52,10 +52,6 @@ param gpt4vModelVersion string = 'vision-preview'
 param chatGpt4vDeploymentCapacity int = 10
 param communicationResourceGroupName string = ''
 param commlocation string
-param properties object = {
-  dataLocation: 'United States'
-} 
-
 
 
 @allowed([ 'azure', 'openai' ])

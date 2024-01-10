@@ -48,7 +48,7 @@
         "value": "content"
       },
       "environmentName": {
-        "value": "mwc-dev"
+        "value": "mwc-dev1"
          
       },
       "resourceGroupName": {
@@ -118,6 +118,9 @@
       },
       "communicationServiceName":{
         "value": ""
-      }
+      },
+      "commlocation":{
+        "value" : "global"
+    }
     }
 }
