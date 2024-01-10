@@ -51,7 +51,10 @@ param gpt4vModelName string = 'gpt-4'
 param gpt4vModelVersion string = 'vision-preview'
 param chatGpt4vDeploymentCapacity int = 10
 param communicationResourceGroupName string = ''
-param linkedDomains array = [] // Update with the desired linked domains
+param commlocation string
+param properties object = {
+  dataLocation: 'United States'
+} 
 
 
 
@@ -257,16 +260,15 @@ module openAi 'ai/cognitiveservices.bicep' = {
   }
 }
 
-module communicationServiceModule 'communication/communication.bicep' = {
+module communicationServiceModule 'ai/cognitiveservices.bicep' = {
   name: 'communicationServiceModule'
   scope: communicationResourceGroup
   params: {
     name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
-    location: location
-    dataLocation: location
-    linkedDomains: linkedDomains
+    location: commlocation
   }
 }
+
 
 // Debugging output
 output debugInfo object = {
