@@ -47,10 +47,6 @@
       "storageContainerName": {
         "value": "content"
       },
-      "environmentName": {
-        "value": "mwc-dev3"
-         
-      },
       "resourceGroupName": {
         "value": ""
       },
@@ -121,6 +117,12 @@
       },
       "commlocation":{
         "value" : "global"
+    },
+    "textanalyticsServiceName":{
+      "value": ""
+    },
+    "textanalyticsResourceGroupName":{
+      "value": ""
     }
     }
 }

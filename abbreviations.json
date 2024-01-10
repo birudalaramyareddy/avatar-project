@@ -8,5 +8,6 @@
     "cognitiveServicesAccounts": "cog-",
     "communicationServices": "com-",
     "speechServices":  "spee-",
-    "searServices": "sear"
+    "searServices": "sear-",
+    "textanalyticsServiceName": "text-"
 }

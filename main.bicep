@@ -55,7 +55,8 @@ param commlocation string
 param properties object = {
   dataLocation: 'United States'
 } 
-
+param textanalyticsResourceGroupName string = ''
+param textanalyticsServiceName string = ''
 
 @allowed([ 'azure', 'openai' ])
 param openAiHost string // Set in main.parameters.json
@@ -70,6 +71,8 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 param sku object = {
   name: 'S0'
 }
+
+param formRecognizerSkuName string = 'S0'
 
 param allowedIpRules array = []
 param networkAcls object = empty(allowedIpRules) ? {
@@ -163,6 +166,11 @@ resource communicationResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-
   name: !empty(communicationResourceGroupName) ? communicationResourceGroupName : resourceGroup.name
 }
 
+resource textanalyticsResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(textanalyticsResourceGroupName)) {
+  name: !empty(textanalyticsResourceGroupName) ? textanalyticsResourceGroupName : resourceGroup.name
+}
+
+
 module storage 'storage/storage-account.bicep' = {
   name: 'storage'
   scope: storageResourceGroup
@@ -253,6 +261,19 @@ module communicationServiceModule 'communication/communication.bicep' = {
     name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
     location: commlocation
     properties: properties
+  }
+}
+
+module textanalytics 'ai/cognitiveservices.bicep' = {
+  name: 'textanalytics'
+  scope: textanalyticsResourceGroup
+  params: {
+    name: !empty(textanalyticsServiceName) ? textanalyticsServiceName : '${abbrs.textanalyticsServiceName}${resourceToken}'
+    kind: 'TextAnalytics'
+    location: location
+    sku: {
+      name: formRecognizerSkuName
+    }
   }
 }
 
