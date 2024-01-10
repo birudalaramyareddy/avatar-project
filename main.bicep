@@ -52,6 +52,9 @@ param gpt4vModelVersion string = 'vision-preview'
 param chatGpt4vDeploymentCapacity int = 10
 param communicationResourceGroupName string = ''
 param commlocation string
+param properties object = {
+  dataLocation: 'United States'
+} 
 
 
 @allowed([ 'azure', 'openai' ])
@@ -217,7 +220,7 @@ module searchService 'search/search-services.bicep' = {
   name: 'search-service'
   scope: searchServiceResourceGroup
   params: {
-    name: !empty(searchServiceName) ? searchServiceName : 'gptkb-${resourceToken}'
+    name: !empty(searchServiceName) ? searchServiceName : 'sear-${resourceToken}'
     location: !empty(searchServiceLocation) ? searchServiceLocation : location
     authOptions: {
       aadOrApiKey: {
@@ -235,11 +238,21 @@ module speechServiceModule 'speech/speech-service.bicep' = {
   name: 'speechServiceModule'
   scope: speechServiceResourceGroup
   params: {
-    name: !empty(speechServiceName) ? speechServiceName : 'gptkb-${resourceToken}'
+    name: !empty(speechServiceName) ? speechServiceName : 'spee-${resourceToken}'
     location: location
     publicNetworkAccess: 'Enabled'
     sku: sku
     networkAcls: networkAcls
+  }
+}
+
+module communicationServiceModule 'communication/communication.bicep' = {
+  name: 'communicationServiceModule'
+  scope: communicationResourceGroup
+  params: {
+    name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
+    location: commlocation
+    properties: properties
   }
 }
 
@@ -255,16 +268,6 @@ module openAi 'ai/cognitiveservices.bicep' = {
     deployments: openAiDeployments
   }
 }
-
-module communicationServiceModule 'ai/cognitiveservices.bicep' = {
-  name: 'communicationServiceModule'
-  scope: communicationResourceGroup
-  params: {
-    name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
-    location: commlocation
-  }
-}
-
 
 // Debugging output
 output debugInfo object = {
