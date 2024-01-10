@@ -58,6 +58,7 @@ param properties object = {
 param textanalyticsResourceGroupName string = ''
 param textanalyticsServiceName string = ''
 
+
 @allowed([ 'azure', 'openai' ])
 param openAiHost string // Set in main.parameters.json
 
@@ -74,13 +75,10 @@ param sku object = {
 
 param formRecognizerSkuName string = 'S0'
 
-param allowedIpRules array = []
-param networkAcls object = empty(allowedIpRules) ? {
-  defaultAction: 'Allow'
-} : {
-  ipRules: allowedIpRules
+param networkAcls object = {
   defaultAction: 'Deny'
-}
+  virtualNetworkRules: []
+} 
 
 var defaultOpenAiDeployments = [
   {
@@ -222,6 +220,7 @@ module sqlserver 'sql/sql.bicep' = {
     sid: sid
     tenantId: tenantId
   }
+  
 }
 
 module searchService 'search/search-services.bicep' = {

@@ -14,7 +14,7 @@ resource sqlserver 'Microsoft.Sql/servers@2021-11-01-preview' = {
   properties: {
     version: '12.0'
     minimalTlsVersion: '1.2'
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     administrators: {
       administratorType: 'ActiveDirectory'
       principalType: 'Group'
@@ -23,13 +23,22 @@ resource sqlserver 'Microsoft.Sql/servers@2021-11-01-preview' = {
       tenantId: tenantId
       azureADOnlyAuthentication: true
     }
+    
     restrictOutboundNetworkAccess: 'Disabled'
   }
   location: location
   name: dbServerName
 }
 
-@description('Generated from /subscriptions/bba2c874-6268-48fb-b2c2-4b110514f730/resourceGroups/rg-dbsrv-dev/providers/Microsoft.Sql/servers/dbsrv-amtkmr-dev/databases/db-amtkmr-dev')
+// Create a firewall rule to allow Azure services
+resource firewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
+  name: '${sqlserver.name}/AllowAllWindowsAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0' // Allow all Azure IPs
+    endIpAddress: '0.0.0.0'
+  }
+}
+
 resource sqldb 'Microsoft.Sql/servers/databases@2021-11-01-preview' = {
   sku: {
     name: 'Standard'
