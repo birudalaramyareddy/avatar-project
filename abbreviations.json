@@ -6,5 +6,7 @@
     "sqlname": "sql-",
     "dbServerName": "sqldb-",
     "cognitiveServicesAccounts": "cog-",
-    "communicationServices": "com-"
+    "communicationServices": "com-",
+    "speechServices":  "spee-",
+    "searServices": "sear"
 }

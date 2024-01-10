@@ -220,7 +220,7 @@ module searchService 'search/search-services.bicep' = {
   name: 'search-service'
   scope: searchServiceResourceGroup
   params: {
-    name: !empty(searchServiceName) ? searchServiceName : 'sear-${resourceToken}'
+    name: !empty(searchServiceName) ? searchServiceName : '${abbrs.searServices}${resourceToken}'
     location: !empty(searchServiceLocation) ? searchServiceLocation : location
     authOptions: {
       aadOrApiKey: {
@@ -238,7 +238,7 @@ module speechServiceModule 'speech/speech-service.bicep' = {
   name: 'speechServiceModule'
   scope: speechServiceResourceGroup
   params: {
-    name: !empty(speechServiceName) ? speechServiceName : 'spee-${resourceToken}'
+    name: !empty(speechServiceName) ? speechServiceName : '${abbrs.speechServices}${resourceToken}'
     location: location
     publicNetworkAccess: 'Enabled'
     sku: sku
