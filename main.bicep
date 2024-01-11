@@ -15,8 +15,6 @@ param location string
 param ADGroupAdmin string 
 @description('sid of the AD group name for Sql Admin Login')
 param sid string 
-@description('tenant id')
-param tenantId string 
 
 param storageAccountName string = ''
 param storageResourceGroupName string = ''
@@ -31,12 +29,12 @@ param searchServiceResourceGroupName string = ''
 param speechServiceResourceGroupName string = ''
 param searchServiceName string = ''
 param speechServiceName string = ''
-param searchServiceLocation string = ''
+param searchServiceLocation string = '' 
+param backendServiceName string = ''
 
 param openAiResourceGroupName string = ''
 param openAiServiceName string = ''
 param communicationServiceName string = ''
-param openAiResourceGroupLocation string
 param openAiSkuName string = 'S0'
 param chatGptDeploymentName string // Set in main.parameters.json
 param chatGptModelName string = (openAiHost == 'azure') ? 'gpt-3.5-turbo' : 'gpt-35-turbo'
@@ -45,19 +43,35 @@ param chatGptDeploymentCapacity int = 30
 param embeddingDeploymentName string // Set in main.parameters.json
 param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingDeploymentCapacity int = 30
-param useGPT4V bool = true
-param gpt4vDeploymentName string = 'gpt-4v'
-param gpt4vModelName string = 'gpt-4'
-param gpt4vModelVersion string = 'vision-preview'
-param chatGpt4vDeploymentCapacity int = 10
 param communicationResourceGroupName string = ''
 param commlocation string
 param properties object = {
   dataLocation: 'United States'
 } 
-param textanalyticsResourceGroupName string = ''
-param textanalyticsServiceName string = ''
+param formRecognizerResourceGroupName string = ''
+param TextAnalyticsResourceGroupName string = ''
+param multiserviceResourceGroupName string = ''
+param formRecognizerServiceName string = ''
+param TextAnalyticsServiceName string = ''
+param multiServiceName string = ''
+param formRecognizerResourceGroupLocation string = location
+param TextAnalyticsResourceGroupLocation string = location
+param multiserviceResourceGroupLocation string = location
+param formRecognizerSkuName string = 'S0'
+param TextAnalyticsSkuName string = 'S'
 
+
+@description('Location for the OpenAI resource group')
+@allowed(['canadaeast', 'eastus', 'eastus2', 'francecentral', 'switzerlandnorth', 'uksouth', 'japaneast', 'northcentralus', 'australiaeast', 'swedencentral'])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
+param openAiResourceGroupLocation string
+
+// Used for optional CORS support for alternate frontends
+param allowedOrigin string = '' // should start with https://, shouldn't end with a /
 
 @allowed([ 'azure', 'openai' ])
 param openAiHost string // Set in main.parameters.json
@@ -69,18 +83,31 @@ param searchServiceSkuName string // Set in main.parameters.json
 var abbrs = loadJsonContent('abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 
+
 param sku object = {
   name: 'S0'
 }
-
-param formRecognizerSkuName string = 'S0'
 
 param networkAcls object = {
   defaultAction: 'Deny'
   virtualNetworkRules: []
 } 
 
-var defaultOpenAiDeployments = [
+param tenantId string = tenant().tenantId
+param authTenantId string = ''
+
+// Used for the optional login and document level access control system
+param useAuthentication bool = false
+
+
+var tenantIdForAuth = !empty(authTenantId) ? authTenantId : tenantId
+var authenticationIssuerUri = '${environment().authentication.loginEndpoint}${tenantIdForAuth}/v2.0'
+
+param searchIndexName string // Set in main.parameters.json
+param openAiApiKey string = ''
+param openAiApiOrganization string = ''
+
+var openAiDeployments = [
   {
     name: chatGptDeploymentName
     properties: {
@@ -113,23 +140,6 @@ var defaultOpenAiDeployments = [
   }
 ]
 
-var openAiDeployments = concat(defaultOpenAiDeployments, useGPT4V ? [
-  {
-    name: gpt4vDeploymentName
-    properties: {
-      model: {
-        format: 'OpenAI'
-        name: gpt4vModelName
-        version: gpt4vModelVersion
-      }
-      raiPolicyName: null
-    }
-    sku: {
-      name: 'Standard'
-      capacity: chatGpt4vDeploymentCapacity
-    }
-  }
-] : [])
 
 
 // Organize resources in a resource group
@@ -164,10 +174,16 @@ resource communicationResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-
   name: !empty(communicationResourceGroupName) ? communicationResourceGroupName : resourceGroup.name
 }
 
-resource textanalyticsResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(textanalyticsResourceGroupName)) {
-  name: !empty(textanalyticsResourceGroupName) ? textanalyticsResourceGroupName : resourceGroup.name
+resource formRecognizerResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(formRecognizerResourceGroupName)) {
+  name: !empty(formRecognizerResourceGroupName) ? formRecognizerResourceGroupName : resourceGroup.name
 }
 
+resource TextAnalyticsResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(TextAnalyticsResourceGroupName)) {
+  name: !empty(TextAnalyticsResourceGroupName) ? TextAnalyticsResourceGroupName : resourceGroup.name
+}
+resource multiserviceResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(multiserviceResourceGroupName)) {
+  name: !empty(multiserviceResourceGroupName) ? multiserviceResourceGroupName : resourceGroup.name
+}
 
 module storage 'storage/storage-account.bicep' = {
   name: 'storage'
@@ -263,19 +279,6 @@ module communicationServiceModule 'communication/communication.bicep' = {
   }
 }
 
-module textanalytics 'ai/cognitiveservices.bicep' = {
-  name: 'textanalytics'
-  scope: textanalyticsResourceGroup
-  params: {
-    name: !empty(textanalyticsServiceName) ? textanalyticsServiceName : '${abbrs.textanalyticsServiceName}${resourceToken}'
-    kind: 'TextAnalytics'
-    location: location
-    sku: {
-      name: formRecognizerSkuName
-    }
-  }
-}
-
 module openAi 'ai/cognitiveservices.bicep' = {
   name: 'openai'
   scope: openAiResourceGroup
@@ -289,17 +292,100 @@ module openAi 'ai/cognitiveservices.bicep' = {
   }
 }
 
-// Debugging output
-output debugInfo object = {
-  environmentName: environmentName
-  location: location
-  openAiDeployments: openAiDeployments
+module formRecognizer 'ai/cognitiveservices.bicep' = {
+  name: 'formrecognizer'
+  scope: formRecognizerResourceGroup
+  params: {
+    name: !empty(formRecognizerServiceName) ? formRecognizerServiceName : '${abbrs.cognitiveServicesFormRecognizer}${resourceToken}'
+    kind: 'FormRecognizer'
+    location: formRecognizerResourceGroupLocation
+    sku: {
+      name: formRecognizerSkuName
+    }
+  }
+}
+
+module TextAnalytics 'ai/cognitiveservices.bicep' = {
+  name: 'TextAnalytics'
+  scope: TextAnalyticsResourceGroup
+  params: {
+    name: !empty(TextAnalyticsServiceName) ? TextAnalyticsServiceName : '${abbrs.cognitiveServicesTextAnalytics}${resourceToken}'
+    kind: 'TextAnalytics'
+    location: TextAnalyticsResourceGroupLocation
+    sku: {
+      name: TextAnalyticsSkuName
+    }
+  }
+}
+
+module multiservice 'ai/cognitiveservices.bicep' = {
+  name: 'multiservice'
+  scope: multiserviceResourceGroup
+  params: {
+    name: !empty(multiServiceName) ? multiServiceName : '${abbrs.cognitiveServicesmultiaccount}${resourceToken}'
+    kind: 'CognitiveServices'
+    location: multiserviceResourceGroupLocation
+    sku: { 
+      name: formRecognizerSkuName
+    }
+  }
+}
+
+
+
+// The application frontend
+module backend 'host/appservice.bicep' = {
+  name: 'web'
+  scope: resourceGroup
+  params: {
+    name: !empty(backendServiceName) ? backendServiceName : '${abbrs.webSitesAppService}backend-${resourceToken}'
+    location: location
+    runtimeName: 'python'
+    runtimeVersion: '3.11'
+    appServicePlanId: appServicePlan.outputs.id
+    scmDoBuildDuringDeployment: true
+    managedIdentity: true
+    allowedOrigins: [allowedOrigin]
+    authenticationIssuerUri: authenticationIssuerUri
+    appSettings: {
+    }
+  }
 }
 
 
 output AZURE_LOCATION string = location
+output AZURE_TENANT_ID string = tenantId
+output AZURE_AUTH_TENANT_ID string = authTenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
+
+// Shared by all OpenAI deployments
+output OPENAI_HOST string = openAiHost
+output AZURE_OPENAI_EMB_MODEL_NAME string = embeddingModelName
+output AZURE_OPENAI_CHATGPT_MODEL string = chatGptModelName
+
+// Specific to Azure OpenAI
+output AZURE_OPENAI_SERVICE string = (openAiHost == 'azure') ? openAi.outputs.name : ''
+output AZURE_OPENAI_RESOURCE_GROUP string = (openAiHost == 'azure') ? openAiResourceGroup.name : ''
+output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = (openAiHost == 'azure') ? chatGptDeploymentName : ''
+output AZURE_OPENAI_EMB_DEPLOYMENT string = (openAiHost == 'azure') ? embeddingDeploymentName : ''
+
+
+// Used only with non-Azure OpenAI deployments
+output OPENAI_API_KEY string = (openAiHost == 'openai') ? openAiApiKey : ''
+output OPENAI_ORGANIZATION string = (openAiHost == 'openai') ? openAiApiOrganization : ''
+
+
+output AZURE_FORMRECOGNIZER_SERVICE string = formRecognizer.outputs.name
+output AZURE_FORMRECOGNIZER_RESOURCE_GROUP string = formRecognizerResourceGroup.name
+
+output AZURE_SEARCH_INDEX string = searchIndexName
+output AZURE_SEARCH_SERVICE string = searchService.outputs.name
+output AZURE_SEARCH_SERVICE_RESOURCE_GROUP string = searchServiceResourceGroup.name
 
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_CONTAINER string = storageContainerName
 output AZURE_STORAGE_RESOURCE_GROUP string = storageResourceGroup.name
+
+output AZURE_USE_AUTHENTICATION bool = useAuthentication
+
+output BACKEND_URI string = backend.outputs.uri

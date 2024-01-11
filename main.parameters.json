@@ -2,6 +2,55 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+      "multiserviceResourceGroupName": {
+        "value": ""
+      },
+      "multiServiceName": {
+        "value": ""
+      },
+
+      "backendServiceName": {
+        "value": ""
+      },
+      "formRecognizerResourceGroupName": {
+        "value": ""
+      },
+      "TextAnalyticsResourceGroupName":{
+        "value": ""
+      },
+      "formRecognizerServiceName": {
+        "value": ""
+      },
+      "TextAnalyticsServiceName":{
+        "value": ""
+      },
+      "formRecognizerSkuName": {
+        "value": "S0"
+      },
+      "TextAnalyticsSkuName":{
+        "value": "S"
+      },
+
+      "allowedOrigin": {
+        "value": ""
+      },
+      "authTenantId": {
+        "value": ""
+      },
+      "useAuthentication": {
+        "value": false
+      },
+
+      "searchIndexName": {
+        "value": ""
+      },
+
+      "openAiApiKey": {
+        "value": ""
+      },
+      "openAiApiOrganization": {
+        "value": ""
+      },
       "communicationResourceGroupName": {
         "value": ""
       },
@@ -93,22 +142,6 @@
       "embeddingDeploymentCapacity": {
         "value": 30
       },
-      "useGPT4V": {
-        "value": false
-      },
-      "gpt4vDeploymentName": {
-        "value": "gpt-4v"
-      },
-      "gpt4vModelName": {
-        "value": "gpt-4"
-      },
-      "gpt4vModelVersion": {
-        "value": "vision-preview"
-      },
-      "chatGpt4vDeploymentCapacity": {
-        "value": 10
-      },
-     
       "openAiHost": {
         "value": "openai"
       },
@@ -117,12 +150,6 @@
       },
       "commlocation":{
         "value" : "global"
-    },
-    "textanalyticsServiceName":{
-      "value": ""
-    },
-    "textanalyticsResourceGroupName":{
-      "value": ""
     }
     }
 }

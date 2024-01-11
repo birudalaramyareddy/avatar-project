@@ -2,12 +2,14 @@
     "resourcesResourceGroups": "rg-",
     "storageStorageAccounts": "st",
     "webServerFarms": "plan-",
-    "keyVaultVaults": "kv-",
     "sqlname": "sql-",
     "dbServerName": "sqldb-",
     "cognitiveServicesAccounts": "cog-",
     "communicationServices": "com-",
     "speechServices":  "spee-",
     "searServices": "sear-",
-    "textanalyticsServiceName": "text-"
+    "cognitiveServicesFormRecognizer": "cog-fr-",
+    "cognitiveServicesmultiaccount": "cog-ms-",
+    "webSitesAppService": "app-",
+    "cognitiveServicesTextAnalytics": "cog-ta-"
 }
