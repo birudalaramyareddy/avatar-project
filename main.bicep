@@ -86,12 +86,11 @@ param sku object = {
 }
 
 param virtualNetworks_vnet1 string
-param subnet string
 param networkAcls object= {
   bypass: 'AzureServices'
   virtualNetworkRules: [
     {
-      id: '${virtualNetworks_vnet1}/subnets/${subnet}'
+      id: '${virtualNetworks_vnet1}/subnets/default'
       action: 'Allow'
     }
   ]
@@ -101,7 +100,7 @@ param networkAcls object= {
 param networkAclsds object= {
   virtualNetworkRules: [
     {
-      id: '${virtualNetworks_vnet1}/subnets/${subnet}'
+      id: '${virtualNetworks_vnet1}/subnets/default'
       action: 'Allow'
     }
   ]
