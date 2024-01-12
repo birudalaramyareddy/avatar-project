@@ -17,3 +17,14 @@ Azure Speech Service
 Azure Blob Storage account
 Upload the images in the product-images directory to a blob container in the Storage Account. Generate a SAS url for the blob storage container. We will need this in a later step.
 
+resource                                             private access and allow vnet access
+storage account                                         completed bypassed option to allow azure services
+sql 
+search service
+speech service                                         completed doesn't have option to allow azure services
+open ai                                                completed bypassed option to allow azure services
+app service
+communication service                                  completed bypassed option to allow azure services
+azure AI services multi service account                completed doesn't have option to allow azure services
+Azure text analytics                                   completed doesn't have option to allow azure services
+from recognizer (document intelligence)                completed doesn't have option to allow azure services
