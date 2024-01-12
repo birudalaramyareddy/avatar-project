@@ -13,10 +13,8 @@ param sku object = {
   name: 'S0'
 }
 
-param networkAcls object = {
-  defaultAction: 'Deny'
-  virtualNetworkRules: []
-} 
+
+param networkAcls object 
 
 resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: name
