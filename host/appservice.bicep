@@ -1,12 +1,14 @@
 metadata description = 'Creates an Azure App Service in an existing Azure App Service plan.'
 param name string
 param location string = resourceGroup().location
-param tags object = {}
 
 // Reference Properties
 param appServicePlanId string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
+
+@allowed([ 'Enabled', 'Disabled' ])
+param publicNetworkAccess string 
 
 // Runtime Properties
 @allowed([
@@ -39,6 +41,7 @@ param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
 param clientAppId string = ''
+param networkAcls object 
 param serverAppId string = ''
 @secure()
 param clientSecretSettingName string = ''
@@ -57,7 +60,6 @@ var requiredAudiences = ['api://${serverAppId}']
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
-  tags: tags
   kind: kind
   properties: {
     serverFarmId: appServicePlanId
@@ -67,6 +69,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       ftpsState: ftpsState
       minTlsVersion: '1.2'
       appCommandLine: appCommandLine
+      publicNetworkAccess: publicNetworkAccess
       numberOfWorkers: numberOfWorkers != -1 ? numberOfWorkers : null
       minimumElasticInstanceCount: minimumElasticInstanceCount != -1 ? minimumElasticInstanceCount : null
       use32BitWorkerProcess: use32BitWorkerProcess
