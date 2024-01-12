@@ -45,9 +45,6 @@ param embeddingModelName string = 'text-embedding-ada-002'
 param embeddingDeploymentCapacity int = 30
 param communicationResourceGroupName string = ''
 param commlocation string
-param properties object = {
-  dataLocation: 'United States'
-} 
 param formRecognizerResourceGroupName string = ''
 param TextAnalyticsResourceGroupName string = ''
 param multiserviceResourceGroupName string = ''
@@ -88,10 +85,28 @@ param sku object = {
   name: 'S0'
 }
 
-param networkAcls object = {
+param virtualNetworks_vnet1 string
+param networkAcls object= {
+  bypass: 'AzureServices'
+  virtualNetworkRules: [
+    {
+      id: '${virtualNetworks_vnet1}/subnets/default'
+      action: 'Allow'
+    }
+  ]
+  ipRules: []
   defaultAction: 'Deny'
-  virtualNetworkRules: []
-} 
+}
+param networkAclsds object= {
+  virtualNetworkRules: [
+    {
+      id: '${virtualNetworks_vnet1}/subnets/default'
+      action: 'Allow'
+    }
+  ]
+  ipRules: []
+  defaultAction: 'Deny'
+}
 
 param tenantId string = tenant().tenantId
 param authTenantId string = ''
@@ -106,6 +121,7 @@ var authenticationIssuerUri = '${environment().authentication.loginEndpoint}${te
 param searchIndexName string // Set in main.parameters.json
 param openAiApiKey string = ''
 param openAiApiOrganization string = ''
+
 
 var openAiDeployments = [
   {
@@ -181,6 +197,7 @@ resource formRecognizerResourceGroup 'Microsoft.Resources/resourceGroups@2021-04
 resource TextAnalyticsResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(TextAnalyticsResourceGroupName)) {
   name: !empty(TextAnalyticsResourceGroupName) ? TextAnalyticsResourceGroupName : resourceGroup.name
 }
+
 resource multiserviceResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(multiserviceResourceGroupName)) {
   name: !empty(multiserviceResourceGroupName) ? multiserviceResourceGroupName : resourceGroup.name
 }
@@ -192,7 +209,8 @@ module storage 'storage/storage-account.bicep' = {
     name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
     location: storageResourceGroupLocation
     allowBlobPublicAccess: false
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Enabled' //disable public access
+    networkAcls: networkAcls
     sku: {
       name: storageSkuName
     }
@@ -245,6 +263,8 @@ module searchService 'search/search-services.bicep' = {
   params: {
     name: !empty(searchServiceName) ? searchServiceName : '${abbrs.searServices}${resourceToken}'
     location: !empty(searchServiceLocation) ? searchServiceLocation : location
+    publicNetworkAccess: 'enabled' //disable public access
+    networkAcls: networkAclsds
     authOptions: {
       aadOrApiKey: {
         aadAuthFailureMode: 'http401WithBearerChallenge'
@@ -263,7 +283,7 @@ module speechServiceModule 'speech/speech-service.bicep' = {
   params: {
     name: !empty(speechServiceName) ? speechServiceName : '${abbrs.speechServices}${resourceToken}'
     location: location
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'enabled'
     sku: sku
     networkAcls: networkAcls
   }
@@ -275,9 +295,9 @@ module communicationServiceModule 'communication/communication.bicep' = {
   params: {
     name: !empty(communicationServiceName) ? communicationServiceName : '${abbrs.communicationServices}${resourceToken}'
     location: commlocation
-    properties: properties
   }
 }
+
 
 module openAi 'ai/cognitiveservices.bicep' = {
   name: 'openai'
@@ -285,6 +305,8 @@ module openAi 'ai/cognitiveservices.bicep' = {
   params: {
     name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: openAiResourceGroupLocation
+    networkAcls : networkAcls
+    publicNetworkAccess :'Enabled'
     sku: {
       name: openAiSkuName
     }
@@ -299,6 +321,8 @@ module formRecognizer 'ai/cognitiveservices.bicep' = {
     name: !empty(formRecognizerServiceName) ? formRecognizerServiceName : '${abbrs.cognitiveServicesFormRecognizer}${resourceToken}'
     kind: 'FormRecognizer'
     location: formRecognizerResourceGroupLocation
+    networkAcls : networkAclsds
+    publicNetworkAccess :'Enabled'
     sku: {
       name: formRecognizerSkuName
     }
@@ -312,6 +336,8 @@ module TextAnalytics 'ai/cognitiveservices.bicep' = {
     name: !empty(TextAnalyticsServiceName) ? TextAnalyticsServiceName : '${abbrs.cognitiveServicesTextAnalytics}${resourceToken}'
     kind: 'TextAnalytics'
     location: TextAnalyticsResourceGroupLocation
+    networkAcls : networkAclsds
+    publicNetworkAccess :'Enabled'
     sku: {
       name: TextAnalyticsSkuName
     }
@@ -325,6 +351,8 @@ module multiservice 'ai/cognitiveservices.bicep' = {
     name: !empty(multiServiceName) ? multiServiceName : '${abbrs.cognitiveServicesmultiaccount}${resourceToken}'
     kind: 'CognitiveServices'
     location: multiserviceResourceGroupLocation
+    networkAcls : networkAclsds
+    publicNetworkAccess :'Enabled'
     sku: { 
       name: formRecognizerSkuName
     }
@@ -343,6 +371,8 @@ module backend 'host/appservice.bicep' = {
     runtimeName: 'python'
     runtimeVersion: '3.11'
     appServicePlanId: appServicePlan.outputs.id
+    publicNetworkAccess: 'Enabled' //disable public access
+    networkAcls: networkAcls
     scmDoBuildDuringDeployment: true
     managedIdentity: true
     allowedOrigins: [allowedOrigin]
