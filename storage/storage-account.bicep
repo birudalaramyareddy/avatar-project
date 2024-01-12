@@ -18,10 +18,8 @@ param dnsEndpointType string = 'Standard'
 param kind string = 'StorageV2'
 param minimumTlsVersion string = 'TLS1_2'
 param supportsHttpsTrafficOnly bool = true
-param networkAcls object = {
-  bypass: 'AzureServices'
-  defaultAction: 'Deny'
-}
+param networkAcls object 
+
 @allowed([ 'Enabled', 'Disabled' ])
 param publicNetworkAccess string = 'Disabled'
 param sku object = { name: 'Standard_LRS' }
@@ -42,6 +40,21 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     networkAcls: networkAcls
     publicNetworkAccess: publicNetworkAccess
     supportsHttpsTrafficOnly: supportsHttpsTrafficOnly
+    encryption: {
+      requireInfrastructureEncryption: true
+      services: {
+        file: {
+          keyType: 'Account'
+          enabled: true
+        }
+        blob: {
+          keyType: 'Account'
+          enabled: true
+        }
+      }
+      keySource: 'Microsoft.Storage'
+
+    }
   }
 
   resource blobServices 'blobServices' = if (!empty(containers)) {
