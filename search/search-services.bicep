@@ -18,10 +18,7 @@ param encryptionWithCmk object = {
   'highDensity'
 ])
 param hostingMode string = 'default'
-param networkRuleSet object = {
-  bypass: 'None'
-  ipRules: []
-}
+param networkAcls object 
 param partitionCount int = 1
 @allowed([
   'enabled'
@@ -49,7 +46,7 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
     disabledDataExfiltrationOptions: disabledDataExfiltrationOptions
     encryptionWithCmk: encryptionWithCmk
     hostingMode: hostingMode
-    networkRuleSet: networkRuleSet
+    networkRuleSet: networkAcls
     partitionCount: partitionCount
     publicNetworkAccess: publicNetworkAccess
     replicaCount: replicaCount
